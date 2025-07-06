@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="style.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#f51ca0" />
+    <title>BabyTracker</title>
+  </head>
+
+  <body>
+    <header class="app-header">
+      <div class="photo-wrapper">
+        <img
+          id="babyPhoto"
+          src="icons/icon-192.png"
+          alt="Baby Photo"
+          class="baby-photo"
+        />
+        <input
+          type="file"
+          id="photoInput"
+          accept="image/*"
+          class="file-input"
+        />
+      </div>
+      <input
+        type="text"
+        id="userNameInput"
+        placeholder="Baby name"
+        class="name-input"
+      />
+    </header>
+    <section class="actions">
+      <div class="action-block">
+        <button class="action-btn" id="sleepBtn">
+          <i class="fas fa-moon"></i><span>Сон</span>
+        </button>
+      </div>
+
+      <div class="action-block">
+        <button class="action-btn" id="wakeBtn">
+          <i class="fas fa-sun"></i><span>Проснулась</span>
+        </button>
+      </div>
+
+      <div class="action-block">
+        <button class="action-btn" id="diaperBtn">
+          <i class="fas fa-retweet"></i><span>Подгузник</span>
+        </button>
+      </div>
+
+      <div class="action-block">
+        <button class="action-btn" id="peeBtn">
+          <i class="fas fa-tint"></i><span>Пи</span>
+        </button>
+      </div>
+
+      <div class="action-block">
+        <button class="action-btn" id="pooBtn">
+          <i class="fas fa-poo"></i><span>Кака</span>
+        </button>
+      </div>
+
+      <div class="action-block">
+        <button class="action-btn" id="feedBtn">
+          <i class="fas fa-utensils"></i><span>Еда</span>
+        </button>
+        <span class="time-label">Объём (мл):</span>
+        <input
+          type="number"
+          id="feedAmountInput"
+          class="amount-input"
+          placeholder="мл"
+          min="10"
+          step="1"
+        />
+      </div>
+    </section>
+    <section class="manual-time">
+      <label for="globalDateInput">Дата:</label>
+      <input type="date" id="globalDateInput" class="date-input" />
+    </section>
+    <section class="manual-time">
+      <label for="globalTimeInput">Время (по желанию):</label>
+      <input type="time" id="globalTimeInput" class="time-input" />
+    </section>
+    <section class="filters">
+      <span>Показать:</span>
+      <label
+        ><input type="checkbox" class="filter-checkbox" value="Сон" checked />
+        Сон</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          class="filter-checkbox"
+          value="Проснулась"
+          checked
+        />
+        Проснулась</label
+      >
+      <label
+        ><input
+          type="checkbox"
+          class="filter-checkbox"
+          value="Смена подгузника"
+          checked
+        />
+        Подгузник</label
+      >
+      <label
+        ><input type="checkbox" class="filter-checkbox" value="Пи" checked />
+        Пи</label
+      >
+      <label
+        ><input type="checkbox" class="filter-checkbox" value="Кака" checked />
+        Кака</label
+      >
+      <label
+        ><input type="checkbox" class="filter-checkbox" value="Еда" checked />
+        Еда</label
+      >
+    </section>
+    <section class="feed-summary">
+      Всего съедено: <span id="feedTotal">0</span> мл
+    </section>
+    <!-- <section class="daily-summary-controls">
+      <button id="showSummaryBtn" class="summary-btn">
+        Показать сводку за выбранную дату
+      </button>
+    </section> -->
+    <section class="period-summary-controls">
+      <div class="periodChoice">
+        <label>
+          С:&nbsp;
+          <input type="date" id="startDateInput" />
+        </label>
+        <label>
+          По:&nbsp;
+          <input type="date" id="endDateInput" />
+        </label>
+      </div>
+      <button id="showRangeSummaryBtn" class="summary-btn">
+        Показать сводку за период
+      </button>
+    </section>
+
+    <!-- контейнер для вывода -->
+    <section id="rangeSummary" class="range-summary" style="display: none">
+      <h2>Сводка за период <span id="rangeSummaryDates"></span></h2>
+      <ul id="rangeSummaryList"></ul>
+    </section>
+
+    <!-- Лог событий -->
+    <section class="event-log">
+      <h2>События</h2>
+      <ul id="eventList"></ul>
+    </section>
+    <section class="daily-summary" id="dailySummary" style="display: none">
+      <h2>Сводка за <span id="summaryDate"></span></h2>
+      <ul id="summaryList"></ul>
+    </section>
+    <!-- Load script LAST -->
+    <script src="index.js" defer></script>
+  </body>
+</html>
