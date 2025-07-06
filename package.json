@@ -1,0 +1,11 @@
+{
+  "name": "baby-tracker",
+  "version": "1.0.0",
+  "description": "BabyTracker PWA",
+  "scripts": {
+    "build-sw": "workbox generateSW workbox-config.js"
+  },
+  "devDependencies": {
+    "workbox-cli": "^7.3.0"
+  }
+}

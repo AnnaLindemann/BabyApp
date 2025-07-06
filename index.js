@@ -1,13 +1,64 @@
 // index.js
 
-// ── 1. Service Worker ───────────────────────────────────────────────────────
+// // ── 1. Service Worker ───────────────────────────────────────────────────────
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", async () => {
+//     try {
+//       const reg = await navigator.serviceWorker.register("service-worker.js");
+//       console.log("✅ SW registered:", reg.scope);
+//       await reg.update();
+//       if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+//       reg.addEventListener("updatefound", () => {
+//         const newSW = reg.installing;
+//         newSW.addEventListener("statechange", () => {
+//           if (
+//             newSW.state === "installed" &&
+//             navigator.serviceWorker.controller
+//           ) {
+//             newSW.postMessage({ type: "SKIP_WAITING" });
+//           }
+//         });
+//       });
+//       let refreshing = false;
+//       navigator.serviceWorker.addEventListener("controllerchange", () => {
+//         if (!refreshing) {
+//           refreshing = true;
+//           window.location.reload();
+//         }
+//       });
+//       const updateBtn = document.getElementById("updateAppBtn");
+
+//       if (updateBtn) {
+//         updateBtn.addEventListener("click", async () => {
+//           const reg = await navigator.serviceWorker.getRegistration();
+//           if (reg?.waiting) {
+//             reg.waiting.postMessage({ type: "SKIP_WAITING" });
+//           } else if (reg?.installing) {
+//             console.log("⏳ Ждём, пока установится...");
+//             reg.installing.addEventListener("statechange", (e) => {
+//               if (e.target.state === "installed") {
+//                 reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+//               }
+//             });
+//           } else {
+//             alert("✅ У тебя уже последняя версия!");
+//           }
+//         });
+//       }
+//     } catch (err) {
+//       console.error("❌ SW registration/update failed:", err);
+//     }
+//   });
+// }
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("service-worker.js");
+      const reg = await navigator.serviceWorker.register("sw.js"); // ← подключаем sw.js
       console.log("✅ SW registered:", reg.scope);
-      await reg.update();
+
       if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+
       reg.addEventListener("updatefound", () => {
         const newSW = reg.installing;
         newSW.addEventListener("statechange", () => {
@@ -19,6 +70,7 @@ if ("serviceWorker" in navigator) {
           }
         });
       });
+
       let refreshing = false;
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (!refreshing) {
@@ -26,30 +78,12 @@ if ("serviceWorker" in navigator) {
           window.location.reload();
         }
       });
-      const updateBtn = document.getElementById("updateAppBtn");
-
-      if (updateBtn) {
-        updateBtn.addEventListener("click", async () => {
-          const reg = await navigator.serviceWorker.getRegistration();
-          if (reg?.waiting) {
-            reg.waiting.postMessage({ type: "SKIP_WAITING" });
-          } else if (reg?.installing) {
-            console.log("⏳ Ждём, пока установится...");
-            reg.installing.addEventListener("statechange", (e) => {
-              if (e.target.state === "installed") {
-                reg.waiting?.postMessage({ type: "SKIP_WAITING" });
-              }
-            });
-          } else {
-            alert("✅ У тебя уже последняя версия!");
-          }
-        });
-      }
     } catch (err) {
-      console.error("❌ SW registration/update failed:", err);
+      console.error("❌ SW registration failed:", err);
     }
   });
 }
+
 
 // ── 2. Основная логика после загрузки DOM ───────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
