@@ -84,16 +84,36 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("events", JSON.stringify(arr));
   }
 
+  // function renderEventsForDate(date) {
+  //   eventList.innerHTML = "";
+  //   const all = JSON.parse(localStorage.getItem("events") || "[]");
+  //   all
+  //     .filter((e) => e.startsWith(date + " "))
+  //     .forEach((text) => {
+  //       const li = document.createElement("li");
+  //       li.textContent = text;
+  //       eventList.appendChild(li);
+  //     });
+  // }
+
   function renderEventsForDate(date) {
     eventList.innerHTML = "";
     const all = JSON.parse(localStorage.getItem("events") || "[]");
-    all
-      .filter((e) => e.startsWith(date + " "))
-      .forEach((text) => {
-        const li = document.createElement("li");
-        li.textContent = text;
-        eventList.appendChild(li);
-      });
+
+    const filtered = all.filter((e) => e.startsWith(date + " "));
+
+    // 🧠 Сортировка по времени
+    filtered.sort((a, b) => {
+      const timeA = a.split("—")[1]?.trim() || "";
+      const timeB = b.split("—")[1]?.trim() || "";
+      return timeA.localeCompare(timeB);
+    });
+
+    filtered.forEach((text) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      eventList.appendChild(li);
+    });
   }
 
   function updateFeedTotal() {
@@ -131,85 +151,9 @@ window.addEventListener("DOMContentLoaded", () => {
     }, next - now);
   }
 
-  //   function generateDailySummary() {
-  //     const date = getDateOrToday();
-  //     summaryDateEl.textContent = date;
-  //     summaryList.innerHTML = "";
-  //     const all = JSON.parse(localStorage.getItem("events") || "[]");
-  //     const day = all.filter((e) => e.startsWith(date + " "));
-  //     const totalMl = day.reduce((s, t) => {
-  //       const m = t.match(/Еда:\s*([\d.]+)\s*мл/);
-  //       return s + (m ? parseFloat(m[1]) : 0);
-  //     }, 0);
-  //     summaryList.appendChild(
-  //       Object.assign(document.createElement("li"), {
-  //         textContent: `Всего съедено: ${totalMl} мл`,
-  //       })
-  //     );
-  //     if (day.length === 0) {
-  //       summaryList.appendChild(
-  //         Object.assign(document.createElement("li"), {
-  //           textContent: "Событий за этот день нет.",
-  //         })
-  //       );
-  //     } else {
-  //       day.forEach((text) => {
-  //         summaryList.appendChild(
-  //           Object.assign(document.createElement("li"), {
-  //             textContent: text,
-  //           })
-  //         );
-  //       });
-  //     }
-  //     dailySummary.style.display = "block";
-  //   }
-
-  // 2) Функция для проверки, лежит ли дата между двумя датами
   function isInRange(date, start, end) {
     return date >= start && date <= end;
   }
-
-  // 3) Своя логика генерации отчёта за период
-  //   function generateRangeSummary() {
-  //     const start = startDateInput.value || getDateOrToday();
-  //     const end = endDateInput.value || getDateOrToday();
-
-  //     rangeSummaryDates.textContent = `${start} → ${end}`;
-  //     rangeSummaryList.innerHTML = "";
-
-  //     const all = JSON.parse(localStorage.getItem("events") || "[]");
-  //     const periodEvents = all.filter((ev) => {
-  //       const d = ev.slice(0, 10);
-  //       return isInRange(d, start, end);
-  //     });
-
-  //     const totalMl = periodEvents.reduce((s, ev) => {
-  //       const m = ev.match(/Еда:\s*([\d.]+)\s*мл/);
-  //       return s + (m ? +m[1] : 0);
-  //     }, 0);
-
-  //     rangeSummaryList.appendChild(
-  //       Object.assign(document.createElement("li"), {
-  //         textContent: `Всего съедено: ${totalMl} мл`,
-  //       })
-  //     );
-
-  //     if (!periodEvents.length) {
-  //       rangeSummaryList.appendChild(
-  //         Object.assign(document.createElement("li"), {
-  //           textContent: "Событий за этот период нет.",
-  //         })
-  //       );
-  //     } else {
-  //       periodEvents.forEach((text) => {
-  //         rangeSummaryList.appendChild(
-  //           Object.assign(document.createElement("li"), { textContent: text })
-  //         );
-  //       });
-  //     }
-
-  //     rangeSummary.style.display = "block";
-  //   }
 
   function generateRangeSummary() {
     // 1) Диапазон
