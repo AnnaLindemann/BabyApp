@@ -26,6 +26,25 @@ if ("serviceWorker" in navigator) {
           window.location.reload();
         }
       });
+      const updateBtn = document.getElementById("updateAppBtn");
+
+      if (updateBtn) {
+        updateBtn.addEventListener("click", async () => {
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg?.waiting) {
+            reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          } else if (reg?.installing) {
+            console.log("⏳ Ждём, пока установится...");
+            reg.installing.addEventListener("statechange", (e) => {
+              if (e.target.state === "installed") {
+                reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+              }
+            });
+          } else {
+            alert("✅ У тебя уже последняя версия!");
+          }
+        });
+      }
     } catch (err) {
       console.error("❌ SW registration/update failed:", err);
     }
@@ -50,10 +69,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const eventList = document.getElementById("eventList");
   const feedTotalEl = document.getElementById("feedTotal");
   const filterCheckboxes = document.querySelectorAll(".filter-checkbox");
-  //   const showSummaryBtn = document.getElementById("showSummaryBtn");
-  //   const dailySummary = document.getElementById("dailySummary");
-  //   const summaryDateEl = document.getElementById("summaryDate");
-  //   const summaryList = document.getElementById("summaryList");
+
   const startDateInput = document.getElementById("startDateInput");
   const endDateInput = document.getElementById("endDateInput");
   const showRangeSummaryBtn = document.getElementById("showRangeSummaryBtn");
@@ -84,36 +100,30 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("events", JSON.stringify(arr));
   }
 
-  // function renderEventsForDate(date) {
-  //   eventList.innerHTML = "";
-  //   const all = JSON.parse(localStorage.getItem("events") || "[]");
-  //   all
-  //     .filter((e) => e.startsWith(date + " "))
-  //     .forEach((text) => {
-  //       const li = document.createElement("li");
-  //       li.textContent = text;
-  //       eventList.appendChild(li);
-  //     });
-  // }
-
   function renderEventsForDate(date) {
     eventList.innerHTML = "";
     const all = JSON.parse(localStorage.getItem("events") || "[]");
 
+    // 🧠 Фильтруем только события на нужную дату
     const filtered = all.filter((e) => e.startsWith(date + " "));
 
-    // 🧠 Сортировка по времени
+    // ✅ Сортировка по времени (надёжная)
     filtered.sort((a, b) => {
-      const timeA = a.split("—")[1]?.trim() || "";
-      const timeB = b.split("—")[1]?.trim() || "";
-      return timeA.localeCompare(timeB);
+      const getTime = (str) => {
+        const timePart = str.split("—")[1]?.trim();
+        return timePart || "00:00";
+      };
+      return getTime(a).localeCompare(getTime(b));
     });
 
+    // Рендер
     filtered.forEach((text) => {
       const li = document.createElement("li");
       li.textContent = text;
       eventList.appendChild(li);
     });
+
+    applyFilter(); // чтобы фильтры применялись и после сортировки
   }
 
   function updateFeedTotal() {

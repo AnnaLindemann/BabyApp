@@ -166,19 +166,13 @@
       <h2>Сводка за <span id="summaryDate"></span></h2>
       <ul id="summaryList"></ul>
     </section>
+    <button
+      id="updateAppBtn"
+      style="position: fixed; bottom: 10px; right: 10px; z-index: 999"
+    >
+      🔄 Обновить приложение
+    </button>
     <!-- Load script LAST -->
     <script src="index.js" defer></script>
-    <!-- <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then((reg) => {
-            console.log("✅ Service Worker зарегистрирован:", reg);
-          })
-          .catch((err) => {
-            console.warn("❌ Ошибка при регистрации Service Worker:", err);
-          });
-      }
-    </script> -->
   </body>
 </html>
