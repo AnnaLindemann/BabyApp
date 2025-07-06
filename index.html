@@ -15,6 +15,7 @@
 
   <body>
     <header class="app-header">
+      <button id="updateAppBtn">🔄</button>
       <div class="photo-wrapper">
         <img
           id="babyPhoto"
@@ -130,11 +131,7 @@
     <section class="feed-summary">
       Всего съедено: <span id="feedTotal">0</span> мл
     </section>
-    <!-- <section class="daily-summary-controls">
-      <button id="showSummaryBtn" class="summary-btn">
-        Показать сводку за выбранную дату
-      </button>
-    </section> -->
+
     <section class="period-summary-controls">
       <div class="periodChoice">
         <label>
@@ -166,12 +163,7 @@
       <h2>Сводка за <span id="summaryDate"></span></h2>
       <ul id="summaryList"></ul>
     </section>
-    <button
-      id="updateAppBtn"
-      style="position: fixed; bottom: 10px; right: 10px; z-index: 999"
-    >
-      🔄 Обновить приложение
-    </button>
+
     <!-- Load script LAST -->
     <script src="index.js" defer></script>
   </body>

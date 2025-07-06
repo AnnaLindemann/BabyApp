@@ -60,6 +60,17 @@ body {
   box-sizing: border-box;
   text-align: center;
 }
+
+#updateAppBtn {
+  padding: 2 rem;
+  position: absolute;
+  left: 0;
+  background-color: #ffc0cb;
+  border-color: #f1a1c9;
+  margin-left: 2rem;
+  padding: 0.5rem;
+}
+
 .manual-time {
   display: flex;
   justify-content: center;

@@ -171,11 +171,26 @@ window.addEventListener("DOMContentLoaded", () => {
     const end = endDateInput.value || getDateOrToday();
 
     // 2) Забираем все события и фильтруем по дате (YYYY-MM-DD)
+    // const all = JSON.parse(localStorage.getItem("events") || "[]");
+    // const period = all.filter((ev) => {
+    //   const date = ev.slice(0, 10);
+    //   return date >= start && date <= end;
+    // });
     const all = JSON.parse(localStorage.getItem("events") || "[]");
-    const period = all.filter((ev) => {
-      const date = ev.slice(0, 10);
-      return date >= start && date <= end;
-    });
+
+    const period = all
+      .filter((ev) => {
+        const date = ev.slice(0, 10);
+        return date >= start && date <= end;
+      })
+      .sort((a, b) => {
+        const [dA, tA] = a.split("—").length === 2 ? a.split("—") : [a, ""];
+        const [dB, tB] = b.split("—").length === 2 ? b.split("—") : [b, ""];
+
+        const fullA = new Date(dA.trim() + "T" + tA.trim());
+        const fullB = new Date(dB.trim() + "T" + tB.trim());
+        return fullA - fullB;
+      });
 
     // 3) Считаем по категориям
     let diaperCount = 0;

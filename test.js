@@ -243,3 +243,5 @@ window.addEventListener("DOMContentLoaded", () => {
   showSummaryBtn.addEventListener("click", generateDailyFeedSummary);
   // ── END DAILY FEED + FULL DAY SUMMARY ──
 });
+
+style = "position: fixed; bottom: 10px; right: 10px; z-index: 999";
