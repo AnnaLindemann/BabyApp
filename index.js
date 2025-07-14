@@ -1,56 +1,3 @@
-// index.js
-
-// // ── 1. Service Worker ───────────────────────────────────────────────────────
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", async () => {
-//     try {
-//       const reg = await navigator.serviceWorker.register("service-worker.js");
-//       console.log("✅ SW registered:", reg.scope);
-//       await reg.update();
-//       if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
-//       reg.addEventListener("updatefound", () => {
-//         const newSW = reg.installing;
-//         newSW.addEventListener("statechange", () => {
-//           if (
-//             newSW.state === "installed" &&
-//             navigator.serviceWorker.controller
-//           ) {
-//             newSW.postMessage({ type: "SKIP_WAITING" });
-//           }
-//         });
-//       });
-//       let refreshing = false;
-//       navigator.serviceWorker.addEventListener("controllerchange", () => {
-//         if (!refreshing) {
-//           refreshing = true;
-//           window.location.reload();
-//         }
-//       });
-//       const updateBtn = document.getElementById("updateAppBtn");
-
-//       if (updateBtn) {
-//         updateBtn.addEventListener("click", async () => {
-//           const reg = await navigator.serviceWorker.getRegistration();
-//           if (reg?.waiting) {
-//             reg.waiting.postMessage({ type: "SKIP_WAITING" });
-//           } else if (reg?.installing) {
-//             console.log("⏳ Ждём, пока установится...");
-//             reg.installing.addEventListener("statechange", (e) => {
-//               if (e.target.state === "installed") {
-//                 reg.waiting?.postMessage({ type: "SKIP_WAITING" });
-//               }
-//             });
-//           } else {
-//             alert("✅ У тебя уже последняя версия!");
-//           }
-//         });
-//       }
-//     } catch (err) {
-//       console.error("❌ SW registration/update failed:", err);
-//     }
-//   });
-// }
-
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
@@ -83,7 +30,6 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-
 
 // ── 2. Основная логика после загрузки DOM ───────────────────────────────────
 window.addEventListener("DOMContentLoaded", () => {
@@ -133,15 +79,27 @@ window.addEventListener("DOMContentLoaded", () => {
     arr.push(evtText);
     localStorage.setItem("events", JSON.stringify(arr));
   }
+  function updateEvent(index, newText) {
+    //=====================================================
+    const arr = JSON.parse(localStorage.getItem("events") || "[]");
+    arr[index] = newText;
+    localStorage.setItem("events", JSON.stringify(arr));
+  }
+
+  function deleteEvent(index) {
+    const arr = JSON.parse(localStorage.getItem("events") || "[]");
+    arr.splice(index, 1);
+    localStorage.setItem("events", JSON.stringify(arr));
+  }
 
   function renderEventsForDate(date) {
     eventList.innerHTML = "";
     const all = JSON.parse(localStorage.getItem("events") || "[]");
 
-    // 🧠 Фильтруем только события на нужную дату
+    // Фильтруем только события на нужную дату
     const filtered = all.filter((e) => e.startsWith(date + " "));
 
-    // ✅ Сортировка по времени (надёжная)
+    //  Сортировка по времени
     filtered.sort((a, b) => {
       const getTime = (str) => {
         const timePart = str.split("—")[1]?.trim();
@@ -151,13 +109,47 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // Рендер
-    filtered.forEach((text) => {
+    // filtered.forEach((text) => {
+    //   const li = document.createElement("li");
+    //   li.textContent = text;
+    //   eventList.appendChild(li);
+    // });
+    filtered.forEach((text, index) => {
       const li = document.createElement("li");
-      li.textContent = text;
+
+      const span = document.createElement("span");
+      span.textContent = text;
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "✏️";
+      editBtn.title = "Редактировать";
+      editBtn.addEventListener("click", () => {
+        const newText = prompt("Измените событие:", text);
+        if (newText && newText !== text) {
+          updateEvent(index, newText);
+          renderEventsForDate(getDateOrToday());
+          updateFeedTotal();
+        }
+      });
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.title = "Удалить";
+      deleteBtn.addEventListener("click", () => {
+        if (confirm("Удалить это событие?")) {
+          deleteEvent(index);
+          renderEventsForDate(getDateOrToday());
+          updateFeedTotal();
+        }
+      });
+
+      li.appendChild(span);
+      li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
       eventList.appendChild(li);
     });
 
-    applyFilter(); // чтобы фильтры применялись и после сортировки
+    applyFilter();
   }
 
   function updateFeedTotal() {
@@ -204,12 +196,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const start = startDateInput.value || getDateOrToday();
     const end = endDateInput.value || getDateOrToday();
 
-    // 2) Забираем все события и фильтруем по дате (YYYY-MM-DD)
-    // const all = JSON.parse(localStorage.getItem("events") || "[]");
-    // const period = all.filter((ev) => {
-    //   const date = ev.slice(0, 10);
-    //   return date >= start && date <= end;
-    // });
+    // 2) Забираем все события и фильтруем по дате
+
     const all = JSON.parse(localStorage.getItem("events") || "[]");
 
     const period = all
@@ -231,11 +219,10 @@ window.addEventListener("DOMContentLoaded", () => {
     let peeCount = 0;
     let pooCount = 0;
     let foodTotal = 0;
-    const sleepStack = []; // для подсчёта сна
+    const sleepStack = [];
 
     period.forEach((ev) => {
-      // ev = "YYYY-MM-DD Смена подгузника — HH:MM" и т.д.
-      const rest = ev.slice(11).trim(); // "Смена подгузника — HH:MM"
+      const rest = ev.slice(11).trim();
       const [title, time] = rest.split("—").map((s) => s.trim());
 
       if (title === "Смена подгузника") {
@@ -253,21 +240,24 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // 4) Подсчитываем общее время сна по парам Сон→Проснулась
+
     let sleepMinutes = 0;
-    for (let i = 0; i < sleepStack.length - 1; i++) {
-      if (
-        sleepStack[i].type === "Сон" &&
-        sleepStack[i + 1].type === "Проснулась"
-      ) {
-        const [h1, m1] = sleepStack[i].time.split(":").map(Number);
-        const [h2, m2] = sleepStack[i + 1].time.split(":").map(Number);
-        sleepMinutes += h2 * 60 + m2 - (h1 * 60 + m1);
-        i++; // пропускаем «Проснулась»
+    let sleepStart = null;
+
+    sleepStack.forEach(({ type, time }) => {
+      const [h, m] = time.split(":").map(Number);
+      const minutes = h * 60 + m;
+
+      if (type === "Сон") {
+        sleepStart = minutes;
+      } else if (type === "Проснулась" && sleepStart !== null) {
+        sleepMinutes += minutes - sleepStart;
+        sleepStart = null;
       }
-    }
+    });
+
     const hours = Math.floor(sleepMinutes / 60);
     const mins = sleepMinutes % 60;
-
     // 5) Выводим только итоговые строки
     rangeSummaryList.innerHTML = ""; // очищаем предыдущий результат
     rangeSummaryDates.textContent = `${start} → ${end}`;
