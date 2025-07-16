@@ -80,7 +80,6 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("events", JSON.stringify(arr));
   }
   function updateEvent(index, newText) {
-    //=====================================================
     const arr = JSON.parse(localStorage.getItem("events") || "[]");
     arr[index] = newText;
     localStorage.setItem("events", JSON.stringify(arr));
@@ -109,12 +108,43 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // Рендер
-    // filtered.forEach((text) => {
+
+    // filtered.forEach((text, index) => {
     //   const li = document.createElement("li");
-    //   li.textContent = text;
+
+    //   const span = document.createElement("span");
+    //   span.textContent = text;
+
+    //   const editBtn = document.createElement("button");
+    //   editBtn.textContent = "✏️";
+    //   editBtn.title = "Редактировать";
+    //   editBtn.addEventListener("click", () => {
+    //     const newText = prompt("Измените событие:", text);
+    //     if (newText && newText !== text) {
+    //       updateEvent(index, newText);
+    //       renderEventsForDate(getDateOrToday());
+    //       updateFeedTotal();
+    //     }
+    //   });
+
+    //   const deleteBtn = document.createElement("button");
+    //   deleteBtn.textContent = "🗑️";
+    //   deleteBtn.title = "Удалить";
+    //   deleteBtn.addEventListener("click", () => {
+    //     if (confirm("Удалить это событие?")) {
+    //       deleteEvent(index);
+    //       renderEventsForDate(getDateOrToday());
+    //       updateFeedTotal();
+    //     }
+    //   });
+
+    //   li.appendChild(span);
+    //   li.appendChild(editBtn);
+    //   li.appendChild(deleteBtn);
     //   eventList.appendChild(li);
     // });
-    filtered.forEach((text, index) => {
+    filtered.forEach((text) => {
+      const indexInAll = all.indexOf(text); // ← получаем правильный индекс
       const li = document.createElement("li");
 
       const span = document.createElement("span");
@@ -126,7 +156,7 @@ window.addEventListener("DOMContentLoaded", () => {
       editBtn.addEventListener("click", () => {
         const newText = prompt("Измените событие:", text);
         if (newText && newText !== text) {
-          updateEvent(index, newText);
+          updateEvent(indexInAll, newText); // ← правильный индекс
           renderEventsForDate(getDateOrToday());
           updateFeedTotal();
         }
@@ -137,7 +167,7 @@ window.addEventListener("DOMContentLoaded", () => {
       deleteBtn.title = "Удалить";
       deleteBtn.addEventListener("click", () => {
         if (confirm("Удалить это событие?")) {
-          deleteEvent(index);
+          deleteEvent(indexInAll); // ← правильный индекс
           renderEventsForDate(getDateOrToday());
           updateFeedTotal();
         }
@@ -341,6 +371,4 @@ window.addEventListener("DOMContentLoaded", () => {
       renderEventsForDate(getDateOrToday());
     });
   });
-
-  // showSummaryBtn.addEventListener("click", generateDailySummary);
 });
