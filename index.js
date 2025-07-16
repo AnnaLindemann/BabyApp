@@ -342,5 +342,5 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  showSummaryBtn.addEventListener("click", generateDailySummary);
+  // showSummaryBtn.addEventListener("click", generateDailySummary);
 });
