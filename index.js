@@ -109,42 +109,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Рендер
 
-    // filtered.forEach((text, index) => {
-    //   const li = document.createElement("li");
-
-    //   const span = document.createElement("span");
-    //   span.textContent = text;
-
-    //   const editBtn = document.createElement("button");
-    //   editBtn.textContent = "✏️";
-    //   editBtn.title = "Редактировать";
-    //   editBtn.addEventListener("click", () => {
-    //     const newText = prompt("Измените событие:", text);
-    //     if (newText && newText !== text) {
-    //       updateEvent(index, newText);
-    //       renderEventsForDate(getDateOrToday());
-    //       updateFeedTotal();
-    //     }
-    //   });
-
-    //   const deleteBtn = document.createElement("button");
-    //   deleteBtn.textContent = "🗑️";
-    //   deleteBtn.title = "Удалить";
-    //   deleteBtn.addEventListener("click", () => {
-    //     if (confirm("Удалить это событие?")) {
-    //       deleteEvent(index);
-    //       renderEventsForDate(getDateOrToday());
-    //       updateFeedTotal();
-    //     }
-    //   });
-
-    //   li.appendChild(span);
-    //   li.appendChild(editBtn);
-    //   li.appendChild(deleteBtn);
-    //   eventList.appendChild(li);
-    // });
     filtered.forEach((text) => {
-      const indexInAll = all.indexOf(text); // ← получаем правильный индекс
+      const indexInAll = all.indexOf(text);
       const li = document.createElement("li");
 
       const span = document.createElement("span");
@@ -156,7 +122,7 @@ window.addEventListener("DOMContentLoaded", () => {
       editBtn.addEventListener("click", () => {
         const newText = prompt("Измените событие:", text);
         if (newText && newText !== text) {
-          updateEvent(indexInAll, newText); // ← правильный индекс
+          updateEvent(indexInAll, newText);
           renderEventsForDate(getDateOrToday());
           updateFeedTotal();
         }
@@ -167,7 +133,7 @@ window.addEventListener("DOMContentLoaded", () => {
       deleteBtn.title = "Удалить";
       deleteBtn.addEventListener("click", () => {
         if (confirm("Удалить это событие?")) {
-          deleteEvent(indexInAll); // ← правильный индекс
+          deleteEvent(indexInAll);
           renderEventsForDate(getDateOrToday());
           updateFeedTotal();
         }
@@ -221,13 +187,118 @@ window.addEventListener("DOMContentLoaded", () => {
     return date >= start && date <= end;
   }
 
+  function calculateTotalSleep(events) {
+    let sleepMinutes = 0;
+    let lastSleepTime = null;
+
+    events.forEach((ev) => {
+      const rest = ev.slice(11).trim();
+      const [title, timeStr] = rest.split("—").map((s) => s.trim());
+      if (!timeStr) return;
+
+      const [h, m] = timeStr.split(":").map(Number);
+      const minutes = h * 60 + m;
+
+      if (title === "Сон") {
+        lastSleepTime = minutes;
+      } else if (title === "Проснулась" && lastSleepTime !== null) {
+        let duration = minutes - lastSleepTime;
+        if (duration < 0) duration += 24 * 60; // через полночь
+        sleepMinutes += duration;
+        lastSleepTime = null;
+      }
+    });
+
+    const hours = Math.floor(sleepMinutes / 60);
+    const mins = sleepMinutes % 60;
+    return { hours, mins };
+  }
+
+  // function generateRangeSummary() {
+  //   // 1) Диапазон
+  //   const start = startDateInput.value || getDateOrToday();
+  //   const end = endDateInput.value || getDateOrToday();
+
+  //   // 2) Забираем все события и фильтруем по дате
+  //   const all = JSON.parse(localStorage.getItem("events") || "[]");
+
+  //   const period = all
+  //     .filter((ev) => {
+  //       const date = ev.slice(0, 10);
+  //       return date >= start && date <= end;
+  //     })
+  //     .sort((a, b) => {
+  //       const [dA, tA] = a.split("—").length === 2 ? a.split("—") : [a, ""];
+  //       const [dB, tB] = b.split("—").length === 2 ? b.split("—") : [b, ""];
+  //       const fullA = new Date(dA.trim() + "T" + tA.trim());
+  //       const fullB = new Date(dB.trim() + "T" + tB.trim());
+  //       return fullA - fullB;
+  //     });
+
+  //   // 3) Считаем по категориям
+  //   let diaperCount = 0;
+  //   let peeCount = 0;
+  //   let pooCount = 0;
+  //   let foodTotal = 0;
+  //   let sleepMinutes = 0;
+  //   let lastSleepTime = null;
+
+  //   period.forEach((ev) => {
+  //     const rest = ev.slice(11).trim();
+  //     const [title, timeStr] = rest.split("—").map((s) => s.trim());
+
+  //     if (title === "Смена подгузника") {
+  //       diaperCount++;
+  //     } else if (title === "Пи") {
+  //       peeCount++;
+  //     } else if (title === "Кака") {
+  //       pooCount++;
+  //     } else if (title.startsWith("Еда:")) {
+  //       const m = title.match(/Еда:\s*([\d.]+)\s*мл/);
+  //       if (m) foodTotal += parseFloat(m[1]);
+  //     }
+
+  //     if (timeStr) {
+  //       const [h, m] = timeStr.split(":").map(Number);
+  //       const minutes = h * 60 + m;
+
+  //       if (title === "Сон") {
+  //         lastSleepTime = minutes;
+  //       } else if (title === "Проснулась" && lastSleepTime !== null) {
+  //         let duration = minutes - lastSleepTime;
+  //         if (duration < 0) duration += 24 * 60; // если сон через полночь
+  //         sleepMinutes += duration;
+  //         lastSleepTime = null;
+  //       }
+  //     }
+  //   });
+
+  //   const hours = Math.floor(sleepMinutes / 60);
+  //   const mins = sleepMinutes % 60;
+
+  //   // 4) Вывод
+  //   rangeSummaryList.innerHTML = "";
+  //   rangeSummaryDates.textContent = `${start} → ${end}`;
+  //   [
+  //     `Всего съедено: ${foodTotal} мл`,
+  //     `Смена подгузника: ${diaperCount} раз`,
+  //     `Пописала: ${peeCount} раз`,
+  //     `Покакала: ${pooCount} раз`,
+  //     `Сон всего: ${hours} ч ${mins} мин`,
+  //   ].forEach((text) => {
+  //     const li = document.createElement("li");
+  //     li.textContent = text;
+  //     rangeSummaryList.appendChild(li);
+  //   });
+
+  //   rangeSummary.style.display = "block";
+  // }
   function generateRangeSummary() {
     // 1) Диапазон
     const start = startDateInput.value || getDateOrToday();
     const end = endDateInput.value || getDateOrToday();
 
     // 2) Забираем все события и фильтруем по дате
-
     const all = JSON.parse(localStorage.getItem("events") || "[]");
 
     const period = all
@@ -238,7 +309,6 @@ window.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => {
         const [dA, tA] = a.split("—").length === 2 ? a.split("—") : [a, ""];
         const [dB, tB] = b.split("—").length === 2 ? b.split("—") : [b, ""];
-
         const fullA = new Date(dA.trim() + "T" + tA.trim());
         const fullB = new Date(dB.trim() + "T" + tB.trim());
         return fullA - fullB;
@@ -249,11 +319,14 @@ window.addEventListener("DOMContentLoaded", () => {
     let peeCount = 0;
     let pooCount = 0;
     let foodTotal = 0;
-    const sleepStack = [];
+
+    // ❌ Удалено:
+    // let sleepMinutes = 0;
+    // let lastSleepTime = null;
 
     period.forEach((ev) => {
       const rest = ev.slice(11).trim();
-      const [title, time] = rest.split("—").map((s) => s.trim());
+      const [title, timeStr] = rest.split("—").map((s) => s.trim());
 
       if (title === "Смена подгузника") {
         diaperCount++;
@@ -264,34 +337,17 @@ window.addEventListener("DOMContentLoaded", () => {
       } else if (title.startsWith("Еда:")) {
         const m = title.match(/Еда:\s*([\d.]+)\s*мл/);
         if (m) foodTotal += parseFloat(m[1]);
-      } else if (title === "Сон" || title === "Проснулась") {
-        sleepStack.push({ type: title, time });
       }
+
+      // ❌ Удалено всё, что касалось sleepMinutes
     });
 
-    // 4) Подсчитываем общее время сна по парам Сон→Проснулась
+    // ✅ Добавлено:
+    const { hours, mins } = calculateTotalSleep(period);
 
-    let sleepMinutes = 0;
-    let sleepStart = null;
-
-    sleepStack.forEach(({ type, time }) => {
-      const [h, m] = time.split(":").map(Number);
-      const minutes = h * 60 + m;
-
-      if (type === "Сон") {
-        sleepStart = minutes;
-      } else if (type === "Проснулась" && sleepStart !== null) {
-        sleepMinutes += minutes - sleepStart;
-        sleepStart = null;
-      }
-    });
-
-    const hours = Math.floor(sleepMinutes / 60);
-    const mins = sleepMinutes % 60;
-    // 5) Выводим только итоговые строки
-    rangeSummaryList.innerHTML = ""; // очищаем предыдущий результат
+    // 4) Вывод
+    rangeSummaryList.innerHTML = "";
     rangeSummaryDates.textContent = `${start} → ${end}`;
-
     [
       `Всего съедено: ${foodTotal} мл`,
       `Смена подгузника: ${diaperCount} раз`,
@@ -306,6 +362,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     rangeSummary.style.display = "block";
   }
+
   // 4) И навешиваем кнопку
   showRangeSummaryBtn.addEventListener("click", generateRangeSummary);
 
