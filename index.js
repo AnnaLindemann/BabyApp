@@ -41,6 +41,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const globalTimeInput = document.getElementById("globalTimeInput");
   const feedBtn = document.getElementById("feedBtn");
   const feedAmountInput = document.getElementById("feedAmountInput");
+  const feedCommentInput = document.getElementById("feedCommentInput");
   const sleepBtn = document.getElementById("sleepBtn");
   const wakeBtn = document.getElementById("wakeBtn");
   const diaperBtn = document.getElementById("diaperBtn");
@@ -214,85 +215,6 @@ window.addEventListener("DOMContentLoaded", () => {
     return { hours, mins };
   }
 
-  // function generateRangeSummary() {
-  //   // 1) Диапазон
-  //   const start = startDateInput.value || getDateOrToday();
-  //   const end = endDateInput.value || getDateOrToday();
-
-  //   // 2) Забираем все события и фильтруем по дате
-  //   const all = JSON.parse(localStorage.getItem("events") || "[]");
-
-  //   const period = all
-  //     .filter((ev) => {
-  //       const date = ev.slice(0, 10);
-  //       return date >= start && date <= end;
-  //     })
-  //     .sort((a, b) => {
-  //       const [dA, tA] = a.split("—").length === 2 ? a.split("—") : [a, ""];
-  //       const [dB, tB] = b.split("—").length === 2 ? b.split("—") : [b, ""];
-  //       const fullA = new Date(dA.trim() + "T" + tA.trim());
-  //       const fullB = new Date(dB.trim() + "T" + tB.trim());
-  //       return fullA - fullB;
-  //     });
-
-  //   // 3) Считаем по категориям
-  //   let diaperCount = 0;
-  //   let peeCount = 0;
-  //   let pooCount = 0;
-  //   let foodTotal = 0;
-  //   let sleepMinutes = 0;
-  //   let lastSleepTime = null;
-
-  //   period.forEach((ev) => {
-  //     const rest = ev.slice(11).trim();
-  //     const [title, timeStr] = rest.split("—").map((s) => s.trim());
-
-  //     if (title === "Смена подгузника") {
-  //       diaperCount++;
-  //     } else if (title === "Пи") {
-  //       peeCount++;
-  //     } else if (title === "Кака") {
-  //       pooCount++;
-  //     } else if (title.startsWith("Еда:")) {
-  //       const m = title.match(/Еда:\s*([\d.]+)\s*мл/);
-  //       if (m) foodTotal += parseFloat(m[1]);
-  //     }
-
-  //     if (timeStr) {
-  //       const [h, m] = timeStr.split(":").map(Number);
-  //       const minutes = h * 60 + m;
-
-  //       if (title === "Сон") {
-  //         lastSleepTime = minutes;
-  //       } else if (title === "Проснулась" && lastSleepTime !== null) {
-  //         let duration = minutes - lastSleepTime;
-  //         if (duration < 0) duration += 24 * 60; // если сон через полночь
-  //         sleepMinutes += duration;
-  //         lastSleepTime = null;
-  //       }
-  //     }
-  //   });
-
-  //   const hours = Math.floor(sleepMinutes / 60);
-  //   const mins = sleepMinutes % 60;
-
-  //   // 4) Вывод
-  //   rangeSummaryList.innerHTML = "";
-  //   rangeSummaryDates.textContent = `${start} → ${end}`;
-  //   [
-  //     `Всего съедено: ${foodTotal} мл`,
-  //     `Смена подгузника: ${diaperCount} раз`,
-  //     `Пописала: ${peeCount} раз`,
-  //     `Покакала: ${pooCount} раз`,
-  //     `Сон всего: ${hours} ч ${mins} мин`,
-  //   ].forEach((text) => {
-  //     const li = document.createElement("li");
-  //     li.textContent = text;
-  //     rangeSummaryList.appendChild(li);
-  //   });
-
-  //   rangeSummary.style.display = "block";
-  // }
   function generateRangeSummary() {
     // 1) Диапазон
     const start = startDateInput.value || getDateOrToday();
@@ -320,10 +242,6 @@ window.addEventListener("DOMContentLoaded", () => {
     let pooCount = 0;
     let foodTotal = 0;
 
-    // ❌ Удалено:
-    // let sleepMinutes = 0;
-    // let lastSleepTime = null;
-
     period.forEach((ev) => {
       const rest = ev.slice(11).trim();
       const [title, timeStr] = rest.split("—").map((s) => s.trim());
@@ -338,8 +256,6 @@ window.addEventListener("DOMContentLoaded", () => {
         const m = title.match(/Еда:\s*([\d.]+)\s*мл/);
         if (m) foodTotal += parseFloat(m[1]);
       }
-
-      // ❌ Удалено всё, что касалось sleepMinutes
     });
 
     // ✅ Добавлено:
@@ -404,11 +320,23 @@ window.addEventListener("DOMContentLoaded", () => {
   feedBtn.addEventListener("click", () => {
     const amt = feedAmountInput.value.trim();
     if (!amt) return alert("Введите объём смеси");
-    const evt = `${getDateOrToday()} Еда: ${amt} мл — ${getTimeOrNow()}`;
+    const comment = (feedCommentInput?.value || "").trim();
+    const evt =
+      `${getDateOrToday()} Еда: ${amt} мл — ${getTimeOrNow()}` +
+      (comment ? ` — ${comment}` : "");
+
     saveToStorage(evt);
     renderEventsForDate(getDateOrToday());
     updateFeedTotal();
+
     feedAmountInput.value = "";
+    if (feedCommentInput) feedCommentInput.value = "";
+  });
+
+  [feedAmountInput, feedCommentInput].forEach((el) => {
+    el?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") feedBtn.click();
+    });
   });
 
   [sleepBtn, wakeBtn, diaperBtn, peeBtn, pooBtn].forEach((btn) => {

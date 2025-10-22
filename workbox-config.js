@@ -1,10 +1,8 @@
 module.exports = {
   globDirectory: ".",
-  globPatterns: [
-    "**/*.{html,js,css,json,png,ico,woff2}"
-  ],
+  globPatterns: ["**/*.{html,js,css,json,png,ico,woff2}"],
   globIgnores: ["node_modules/**/*"],
-  swDest: "sw.js", // ВАЖНО: ты используешь sw.js, а не service-worker.js
+  swDest: "sw.js",
   clientsClaim: true,
   skipWaiting: true,
   runtimeCaching: [
@@ -39,6 +37,6 @@ module.exports = {
       options: {
         cacheName: "json-cache",
       },
-    }
-  ]
+    },
+  ],
 };
